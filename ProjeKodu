@@ -1,101 +1,116 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
-#define MAX_KIMLIK_UZUNLUGU 12   // Kimlik numarası için maksimum uzunluk (11 haneli + null karakter)
-#define MAX_KIMLIK_GIRISI 100   // Maksimum kimlik sayısı
+#define MAX_KIMLIK_UZUNLUGU 12   // Kimlik numarası için maksimum uzunluk(casus.txt dosyasini yazdırabilmek için maksimum uzunlugu 12 yapmamız lazım.)
+#define MAX_KIMLIK_GIRISI 100   // Yazılabilecek maksimum kimlik sayısı.
 
-int tekrarSayisi(char kimlikListesi[][MAX_KIMLIK_UZUNLUGU], int boyut, char *kimlik) {
+int sadeceRakam(char *kimlik) {//Verilen kimlik numarasının rakamlardan oluşup oluşmadığını kontrol eden fonksiyon.
+    for (int i = 0; i < strlen(kimlik); i++) {
+        if (!isdigit(kimlik[i])) {//isdigit kod bloğu girilen karakterin rakam olup olmadığını kontrol eder.
+            return 0; //Rakam değilse fonksiyonu sonlandırır.
+        }
+    }
+    return 1;//Tüm karakterlerin rakam olduğu durumda 1 döndürür.
+}
+
+int tekrarSayisi(char kimlikListesi[][MAX_KIMLIK_UZUNLUGU], int boyut, char *kimlik) {//Girilen kimlik numaralarının giris.txt dosyasında kaç kez geçtiğini sayar.
     int sayac = 0;
     for (int i = 0; i < boyut; i++) {
-        if (strcmp(kimlikListesi[i], kimlik) == 0) {
+        if (strcmp(kimlikListesi[i], kimlik) == 0) {//Kimlik numarasını dosyadaki kimlikler ile karşılaştırır.
             sayac++;
         }
     }
-    return sayac;
+    return sayac;//Kimlik numarasının tekrar sayısını döndürür.
 }
 
-int zatenYazildi(char yazilanKimlikler[][MAX_KIMLIK_UZUNLUGU], int yazilanSayisi, char *kimlik) {
+int zatenYazildi(char yazilanKimlikler[][MAX_KIMLIK_UZUNLUGU], int yazilanSayisi, char *kimlik) {//Kimlik numarasının daha önce yazılıp yazılmadığını kontrol eder.
     for (int i = 0; i < yazilanSayisi; i++) {
-        if (strcmp(yazilanKimlikler[i], kimlik) == 0) {
-            return 1;
+        if (strcmp(yazilanKimlikler[i], kimlik) == 0) {//Kimlik numarasını yazılanlarla karşılaştırır.
+            return 1;//Kimlik zaten yazılmışsa 1 döndürür.
         }
     }
-    return 0;
+    return 0;//Eğer kimlik daha önce yazılmamışsa 0 döndürür.
 }
 
 int main() {
-    FILE *casusDosyasi;
-    FILE *girisDosyasi;
-    char kimlik[MAX_KIMLIK_UZUNLUGU];
-    char kimlikListesi[MAX_KIMLIK_GIRISI][MAX_KIMLIK_UZUNLUGU];
-    char yazilanKimlikler[MAX_KIMLIK_GIRISI][MAX_KIMLIK_UZUNLUGU];
-    int toplamKimlikSayisi = 0, yazilanKimlikSayisi = 0;
+    FILE *casusDosyasi;//Tekrar eden kimlik numaralarını tutucak dosya.
+    FILE *girisDosyasi;//Tüm giriş yapılan kimlik numaralarını tutucak dosya.
+    char kimlik[MAX_KIMLIK_UZUNLUGU];//Kullanıcının gireceği kimlik numarası
+    char kimlikListesi[MAX_KIMLIK_GIRISI][MAX_KIMLIK_UZUNLUGU];//Tüm Kimlik numaralarının tutulması.
+    char yazilanKimlikler[MAX_KIMLIK_GIRISI][MAX_KIMLIK_UZUNLUGU];//Tekrar eden kimlik numaralarını tutar.
+    int toplamKimlikSayisi = 0, yazilanKimlikSayisi = 0;//Kimlik sayılarının başlangıç değeri 0 a eşitlenir.
 
-    printf("Merhaba Ussumuze Hosgeldiniz.\n");
+    printf("Merhaba Ussumuze Hosgeldiniz.\n");//Giriş metni.
 
-    girisDosyasi = fopen("giris.txt", "w");
+    girisDosyasi = fopen("giris.txt", "w");//Giriş.txt dosyasını yazma modunda açar.
     if (girisDosyasi == NULL) {
-        printf("giris.txt dosyası olusturulamadi.\n");
+        printf("giris.txt dosyası olusturulamadi.\n");//giris.txt dosyasının bulunamadığı durumda hata veren kod bloğu.
         return 1;
     }
 
-    while (1) {
+    while (1) {//Kullanıcıdan kimlik numarası alma işlemleri.
         printf("lutfen kimlik numaranizi girin (programi sonlandirmak icin '0' yazin.):\n");
-        scanf("%s", kimlik);
+        scanf("%s", kimlik);//Kullanıcıdan kimlik numarası alır.
 
-        if (strcmp(kimlik, "0") == 0) {
+        if (strcmp(kimlik, "0") == 0) {//Kullanıcı '0' girerse program sonlandırılır.
             break;
         }
 
-        if (strlen(kimlik) != 11) {
+        if(!sadeceRakam(kimlik)){//Kimlik numarasının sadece rakamdan oluşup oluşmadıgını kontrol eden kod bloğu.
+            printf("Hatali giris.Kimlik numarasi sadece rakamlardan olusmalidir.\n");
+            continue;
+        }
+
+        if (strlen(kimlik) != 11) {//Kimlik numarasının 11 haneli olup olmadığını kontrol eden kod bloğu.
             printf("Hatali giris.Kimlik numarasi 11 haneli olmalidir.\n");
             continue;
         }
 
-        if (toplamKimlikSayisi >= MAX_KIMLIK_GIRISI) {
+        if (toplamKimlikSayisi >= MAX_KIMLIK_GIRISI) {//Girilen kimlik sayısı 100 ü geçtiğinde programı sonlandıran kod bloğu.
             printf("Kimlik listesi kapasitesi asildi.Daha fazla giris kabul edilmiyor.\n");
             break;
         }
 
-        strcpy(kimlikListesi[toplamKimlikSayisi], kimlik);
+        strcpy(kimlikListesi[toplamKimlikSayisi], kimlik);//Kullanıcıdan girilen kimlik numaralarını listeye ekler.
         toplamKimlikSayisi++;
 
-        fprintf(girisDosyasi, "%s\n", kimlik); // Kimlik numarasını giris.txt dosyasına yaz
+        fprintf(girisDosyasi, "%s\n", kimlik);//Girilen kimlik numaralarını giris.txt dosyasına yazar.
     }
 
-    fclose(girisDosyasi);
+    fclose(girisDosyasi);//Girilen kimlik numaraları tamamlandıktan sonra giris.txt dosyasını kapatır.
 
-    casusDosyasi = fopen("casus.txt", "w");
+    casusDosyasi = fopen("casus.txt", "w");//casus.txt dosyasını yazma modunda açar.
     if (casusDosyasi == NULL) {
-        printf("casus.txt dosyasi olusturulamadi.");
+        printf("casus.txt dosyasi olusturulamadi.");//casus.txt dosyasının bulunamadığı durumda hata veren kod bloğu.
         return 1;
     }
 
-    for (int i = 0; i < toplamKimlikSayisi; i++) {
+    for (int i = 0; i < toplamKimlikSayisi; i++) {//Tekrar eden kimlik numaralarını bulur ve casus.txt dosyasına yazar.
         if (tekrarSayisi(kimlikListesi, toplamKimlikSayisi, kimlikListesi[i]) > 1 &&
             !zatenYazildi(yazilanKimlikler, yazilanKimlikSayisi, kimlikListesi[i])) {
-            fprintf(casusDosyasi, "%s\n", kimlikListesi[i]);
-            strcpy(yazilanKimlikler[yazilanKimlikSayisi], kimlikListesi[i]);
+            fprintf(casusDosyasi, "%s\n", kimlikListesi[i]);//Dosyaya yazma işlemi gerçekleşir.
+            strcpy(yazilanKimlikler[yazilanKimlikSayisi], kimlikListesi[i]);//Yazılanların listeye eklenme işlemi gerçekleşir.
             yazilanKimlikSayisi++;
         }
     }
 
     printf("Giris islemi bitti.Tekrar eden kimlik numaralari kaydedildi ve yazildi.\n");
 
-    fclose(casusDosyasi);
+    fclose(casusDosyasi);//İşlem bittikten sonra casus.txt dosyasını kapatır.
 
-    casusDosyasi = fopen("casus.txt", "r");
+    casusDosyasi = fopen("casus.txt", "r");//casus.txt dosyasını okuma modunda açar.
     if (casusDosyasi == NULL) {
-        printf("casus.txt dosyasi acilamadi.\n");
+        printf("casus.txt dosyasi acilamadi.\n");//casus.txt dosyasının bulunamadığı durumda hata veren kod bloğu.
         return 1;
     }
 
-    printf("Kaydedilen Kimlik Numaralari:\n");
+    printf("Kaydedilen Kimlik Numaralari:\n");//casus.txt dosyasındaki tekrar eden kimlik numaralarını ekrana yazdırır.
     while (fgets(kimlik, MAX_KIMLIK_UZUNLUGU, casusDosyasi) != NULL) {
         printf("%s", kimlik);
     }
 
-    fclose(casusDosyasi);
+    fclose(casusDosyasi);//İşlem gerçekleştikten sonra dosyayı kapatır.
 
-    return 0;
+    return 0;//Program sonlandırılır.
 }
